@@ -12,8 +12,8 @@ const InventoryList = ({ inventory, addToCart }: IInventoryListProps) => {
       <h2>Inventory</h2>
       <ul>
         {inventory.map((item) => (
-          <li key={item.name} className="flex items-center gap-2">
-            <span>
+          <li key={item.name} className="flex items-center gap-2 mb-2">
+            <span className="w-[150px]">
               {item.name} - {item.quantity}
             </span>
             <Button

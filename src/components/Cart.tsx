@@ -1,4 +1,4 @@
-import { Button, Input } from "antd";
+import { Button, Input, message } from "antd";
 import { CartItemType } from "../types";
 
 interface ICartProps {
@@ -8,8 +8,11 @@ interface ICartProps {
 }
 
 const Cart = ({ cart, updateCartQuantity, removeFromCart }: ICartProps) => {
+  const [messageApi, contextHolder] = message.useMessage();
+
   return (
     <>
+      {contextHolder}
       <div className="flex flex-col">
         <h2>Cart</h2>
         {!cart.length ? (
@@ -17,8 +20,10 @@ const Cart = ({ cart, updateCartQuantity, removeFromCart }: ICartProps) => {
         ) : (
           <ul>
             {cart.map((item) => (
-              <li key={item.name} className="flex">
-                {item.name} - ${item.unitPrice} x
+              <li key={item.name} className="flex items-center gap-2 mb-2">
+                <span className="w-[150px]">
+                  {item.name} - ${item.unitPrice} x
+                </span>
                 <Button
                   type="primary"
                   onClick={() =>
@@ -33,12 +38,14 @@ const Cart = ({ cart, updateCartQuantity, removeFromCart }: ICartProps) => {
                   value={item.cartQuantity}
                   min={1}
                   onChange={(e) => {
-                    if (!e.target.value) updateCartQuantity(item.name, 0);
-                    else
-                      updateCartQuantity(
-                        item.name,
-                        parseInt(e.target.value, 10)
+                    const value = parseInt(e.target.value, 10);
+                    if (isNaN(value) || value < 0) {
+                      messageApi.error(
+                        "Invalid input. Please enter a positive integer."
                       );
+                      return;
+                    }
+                    updateCartQuantity(item.name, value);
                   }}
                 />
                 <Button
@@ -49,7 +56,9 @@ const Cart = ({ cart, updateCartQuantity, removeFromCart }: ICartProps) => {
                 >
                   +
                 </Button>
-                = ${(item.cartQuantity * item.unitPrice).toFixed(2)}{" "}
+                <span className="w-[100px]">
+                  = ${(item.cartQuantity * item.unitPrice).toFixed(2)}{" "}
+                </span>
                 <Button danger onClick={() => removeFromCart(item.name)}>
                   Remove
                 </Button>
@@ -59,11 +68,13 @@ const Cart = ({ cart, updateCartQuantity, removeFromCart }: ICartProps) => {
         )}
         <div className="flex justify-end">
           <h3 className="mr-4">
-            Total:{" "}
-            {cart.reduce(
-              (acc, item) => acc + item.cartQuantity * item.unitPrice,
-              0
-            )}
+            Total: $
+            {cart
+              .reduce(
+                (acc, item) => acc + item.cartQuantity * item.unitPrice,
+                0
+              )
+              .toFixed(2)}
           </h3>
         </div>
       </div>
